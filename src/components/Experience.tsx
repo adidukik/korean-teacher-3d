@@ -8,7 +8,7 @@ import {
   Html,
   OrbitControls,
 } from '@react-three/drei';
-import Teacher from './Teacher';
+// import Teacher from './Teacher';
 import TypingBox from './TypingBox';
 import { useAITeacher } from '@/hooks/useAITeacher';
 import { degToRad } from 'three/src/math/MathUtils.js';
@@ -33,12 +33,12 @@ export default function Experience() {
         <Html position={[0.22, 0.192, -3]} transform distanceFactor={0.5}>
           <MessagesList />
         </Html>
-        <Teacher
+        {/* <Teacher
           teacher={teacher}
           position={[-1, -1.7, -3]}
           scale={1.5}
           rotation-y={degToRad(20)}
-        />
+        /> */}
         <Gltf src='/models/classroom_default.glb' position={[0.2, -1.7, -2]} />
       </Canvas>
     </>
