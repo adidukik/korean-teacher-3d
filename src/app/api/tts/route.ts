@@ -3,10 +3,20 @@ import { PassThrough } from 'stream';
 import { NextRequest } from 'next/server';
 
 export async function GET(req: NextRequest) {
+  const speechKey = process.env['SPEECH_KEY'];
+  const speechRegion = process.env['SPEECH_REGION'];
+
+  if (!speechKey || !speechRegion) {
+    return new Response('Speech service configuration is missing.', {
+      status: 500,
+    });
+  }
+
   const speechConfig = sdk.SpeechConfig.fromSubscription(
-    process.env['SPEECH_KEY'] ?? '',
-    process.env['SPEECH_REGION'] ?? ''
+    speechKey,
+    speechRegion
   );
+
   // https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts
   const teacher = req.nextUrl.searchParams.get('teacher') || 'SunHi';
   speechConfig.speechSynthesisVoiceName = `ko-KR-${teacher}Neural`;
