@@ -1,15 +1,21 @@
-// @ts-nocheck
+//@ts-nocheck
 const { create } = require('zustand');
-export const teachers = ['Yerin', 'Haneul'];
+
+export const teachers = ['YuJin', 'SunHi'];
 
 export const useAITeacher = create((set, get) => ({
   messages: [],
   currentMessage: null,
   teacher: teachers[0],
-  setTeacher: (teacher) =>
-    set({
+  setTeacher: (teacher) => {
+    set(() => ({
       teacher,
-    }),
+      messages: get().messages.map((message) => {
+        message.audioPlayer = null; // New teacher, new Voice
+        return message;
+      }),
+    }));
+  },
   classroom: 'default',
   setClassroom: (classroom) => {
     set(() => ({
@@ -17,10 +23,10 @@ export const useAITeacher = create((set, get) => ({
     }));
   },
   loading: false,
-  hangeul: true,
-  setHangeul: (hangeul) => {
+  furigana: true,
+  setFurigana: (furigana) => {
     set(() => ({
-      hangeul,
+      furigana,
     }));
   },
   english: true,
@@ -63,53 +69,53 @@ export const useAITeacher = create((set, get) => ({
       messages: [...state.messages, message],
       loading: false,
     }));
-    // get().playMessage(message);
+    get().playMessage(message);
   },
-  //   playMessage: async (message) => {
-  //     set(() => ({
-  //       currentMessage: message,
-  //     }));
+  playMessage: async (message) => {
+    set(() => ({
+      currentMessage: message,
+    }));
 
-  //     if (!message.audioPlayer) {
-  //       set(() => ({
-  //         loading: true,
-  //       }));
-  //       // Get TTS
-  //       const audioRes = await fetch(
-  //         `/api/tts?teacher=${get().teacher}&text=${message.answer.japanese
-  //           .map((word) => word.word)
-  //           .join(' ')}`
-  //       );
-  //       const audio = await audioRes.blob();
-  //       const visemes = JSON.parse(await audioRes.headers.get('visemes'));
-  //       const audioUrl = URL.createObjectURL(audio);
-  //       const audioPlayer = new Audio(audioUrl);
+    if (!message.audioPlayer) {
+      set(() => ({
+        loading: true,
+      }));
+      // Get TTS
+      const audioRes = await fetch(
+        `/api/tts?teacher=${get().teacher}&text=${message.answer.korean
+          .map((word) => word.word)
+          .join(' ')}`
+      );
+      const audio = await audioRes.blob();
+      const visemes = JSON.parse(await audioRes.headers.get('visemes'));
+      const audioUrl = URL.createObjectURL(audio);
+      const audioPlayer = new Audio(audioUrl);
 
-  //       message.visemes = visemes;
-  //       message.audioPlayer = audioPlayer;
-  //       message.audioPlayer.onended = () => {
-  //         set(() => ({
-  //           currentMessage: null,
-  //         }));
-  //       };
-  //       set(() => ({
-  //         loading: false,
-  //         messages: get().messages.map((m) => {
-  //           if (m.id === message.id) {
-  //             return message;
-  //           }
-  //           return m;
-  //         }),
-  //       }));
-  //     }
+      message.visemes = visemes;
+      message.audioPlayer = audioPlayer;
+      message.audioPlayer.onended = () => {
+        set(() => ({
+          currentMessage: null,
+        }));
+      };
+      set(() => ({
+        loading: false,
+        messages: get().messages.map((m) => {
+          if (m.id === message.id) {
+            return message;
+          }
+          return m;
+        }),
+      }));
+    }
 
-  //     message.audioPlayer.currentTime = 0;
-  //     message.audioPlayer.play();
-  //   },
-  //   stopMessage: (message) => {
-  //     message.audioPlayer.pause();
-  //     set(() => ({
-  //       currentMessage: null,
-  //     }));
-  //   },
+    message.audioPlayer.currentTime = 0;
+    message.audioPlayer.play();
+  },
+  stopMessage: (message) => {
+    message.audioPlayer.pause();
+    set(() => ({
+      currentMessage: null,
+    }));
+  },
 }));
